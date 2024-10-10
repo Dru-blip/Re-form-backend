@@ -40,4 +40,23 @@ export class UsersService {
       },
     });
   }
+
+  async findById(id: string) {
+    return await this.db.user.findFirst({
+      where: {
+        id,
+      },
+    });
+  }
+
+  async updateUser(id: string, user: Partial<User>) {
+    return await this.db.user.update({
+      where: {
+        id,
+      },
+      data: {
+        password:user.password
+      },
+    });
+  }
 }

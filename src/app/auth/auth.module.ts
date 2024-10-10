@@ -5,7 +5,8 @@ import PrismaService from 'src/app/database/database.service';
 import { UsersService } from 'src/app/users/users.service';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-
+import { EmailsService } from '../emails/emails.service';
+import { OtpsService } from '../otps/otps.service';
 
 // Module For User Authentication
 @Module({
@@ -28,6 +29,6 @@ import { AuthService } from './auth.service';
   // Load AuthController
   controllers: [AuthController],
   // Mark AuthService as a provider and import UsersService from Users Module
-  providers: [AuthService, UsersService,PrismaService],
+  providers: [AuthService, UsersService, PrismaService, EmailsService,ConfigService,OtpsService],
 })
 export class AuthModule {}

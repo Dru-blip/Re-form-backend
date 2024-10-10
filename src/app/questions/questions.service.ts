@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import PrismaService from '../database/database.service';
 import { CreateQuestionDto } from './dto/create-question.dto';
 import { UpdateQuestionDto } from './dto/update-question.dto';
-import { QuestionType } from '@prisma/client';
+import { Question, QuestionType } from '@prisma/client';
 
 @Injectable()
 export class QuestionsService {
@@ -18,7 +18,7 @@ export class QuestionsService {
     });
   }
 
-  async findAll(formId: string) {
+  async findAll(formId: string):Promise<Question[]> {
     return await this.db.question.findMany({
       where: {
         formId,

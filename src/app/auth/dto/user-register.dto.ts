@@ -15,7 +15,7 @@ export class UserRegisterDto {
     email:string
 
     @IsNotEmpty()
-    @IsStrongPassword()
+    // @IsStrongPassword()
     @ApiProperty()
     password:string
 }

@@ -7,6 +7,15 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model EmailOTP {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  email     String   
+  code      String
+  expiresIn DateTime
+  verified Boolean @default(false)
+  @@map("oneTimePasswords")
+}
+
 model User {
   id       String @id @default(auto()) @map("_id") @db.ObjectId
   name     String
@@ -87,9 +96,11 @@ model Response {
   answers Answer[]
   userid  String?  @db.ObjectId
   formId  String   @db.ObjectId
-  
-  form    Form     @relation(fields: [formId], references: [id], onDelete: Cascade)
-  user    User?    @relation(fields: [userid], references: [id],onDelete:Cascade)
+
+  form Form  @relation(fields: [formId], references: [id], onDelete: Cascade)
+  user User? @relation(fields: [userid], references: [id], onDelete: Cascade)
+
+  @@map("responses")
 }
 
 model Answer {
@@ -102,10 +113,12 @@ model Answer {
   responseId String @db.ObjectId
   formId     String @db.ObjectId
 
-  question Question @relation(fields: [questionId], references: [id],onDelete:Cascade)
-  options   Option[] @relation(fields: [optionIds], references: [id])
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  options  Option[] @relation(fields: [optionIds], references: [id])
   form     Form     @relation(fields: [formId], references: [id], onDelete: Cascade)
-  response Response @relation(fields: [responseId], references: [id],onDelete:Cascade)
+  response Response @relation(fields: [responseId], references: [id], onDelete: Cascade)
+
+  @@map("answers")
 }
 
 enum QuestionType {

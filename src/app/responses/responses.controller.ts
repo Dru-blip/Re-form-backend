@@ -1,30 +1,34 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
-  Req,
-  Query,
+  Get,
+  Header,
+  Param,
   ParseIntPipe,
+  Patch,
+  Post,
+  Query,
+  Req,
+  Res,
 } from '@nestjs/common';
-import { ResponsesService } from './responses.service';
+import { ApiTags } from '@nestjs/swagger';
+import { Workbook } from 'exceljs';
+import { Request } from 'express';
+import { Public } from '../auth/decorators/public.decorator';
+import { QuestionsService } from '../questions/questions.service';
 import { CreateResponseDto } from './dto/create-response.dto';
 import { UpdateResponseDto } from './dto/update-response.dto';
-import { Request } from 'express';
-import { QuestionsService } from '../questions/questions.service';
-import { ApiTags } from '@nestjs/swagger';
-import { Public } from '../auth/decorators/public.decorator';
+import { ExcelService } from './excel.service';
+import { ResponsesService } from './responses.service';
 
-
-@ApiTags("responses")
+@ApiTags('responses')
 @Controller(':formId/responses')
 export class ResponsesController {
   constructor(
     private readonly responsesService: ResponsesService,
     private readonly questionService: QuestionsService,
+    private readonly excelService: ExcelService,
   ) {}
 
   @Post()
@@ -43,6 +47,35 @@ export class ResponsesController {
     return { questions, responses };
   }
 
+  @Get('download')
+  @Header('Content-Disposition', 'attachment; filename="package.xlsx"')
+  async downloadResponses(@Param('formId') formId: string, @Res() res: any) {
+    const questions = await this.questionService.findAll(formId);
+    const responses = await this.responsesService.findAll(formId);
+    const workbook = new Workbook();
+    const sheet = workbook.addWorksheet('Responses');
+    const header = [];
+
+    questions.forEach((question) => {
+      header.push(question.text);
+    });
+
+    this.excelService.writeHeaders(sheet, header);
+
+    responses.forEach((response) => {
+      const rowData: string[] = [];
+      response.answers.forEach((answer) => {
+        if (answer.question.type === 'TEXT') {
+          rowData.push(answer.text);
+        } else {
+          rowData.push(answer.options.map((option) => option.text).join(','));
+        }
+      });
+      sheet.addRow(rowData);
+    });
+    const buffer = await workbook.xlsx.writeBuffer();
+    res.send(buffer);
+  }
 
   @Get('individual')
   async getIndividual(
@@ -50,13 +83,13 @@ export class ResponsesController {
     @Query('take', ParseIntPipe) take: number,
     @Param('formId') formId: string,
   ) {
-    return this.responsesService.getIndividual(skip,take,formId);
+    return this.responsesService.getIndividual(skip, take, formId);
   }
 
-  @Get(":id")
+  @Get(':id')
   @Public()
-  async findOne(@Param("id") id:string){
-    return await this.responsesService.find(id)
+  async findOne(@Param('id') id: string) {
+    return await this.responsesService.find(id);
   }
 
   @Patch(':id')
@@ -65,6 +98,11 @@ export class ResponsesController {
     @Body() updateResponseDto: UpdateResponseDto,
   ) {
     return this.responsesService.update(id, updateResponseDto);
+  }
+
+  @Delete()
+  async removeALl(@Param('formId') formId: string) {
+    return await this.responsesService.removeAll(formId);
   }
 
   @Delete(':id')

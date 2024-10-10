@@ -9,6 +9,8 @@ import { QuestionsModule } from './questions/questions.module';
 import { OptionsModule } from './options/options.module';
 import { ResponsesModule } from './responses/responses.module';
 import { SummariesModule } from './summaries/summaries.module';
+import { EmailsModule } from './emails/emails.module';
+import { OtpsModule } from './otps/otps.module';
 
 
 /**
@@ -31,6 +33,8 @@ import { SummariesModule } from './summaries/summaries.module';
     OptionsModule,
     ResponsesModule,
     SummariesModule,
+    EmailsModule,
+    OtpsModule,
   ],
 })
 export class AppModule {}
