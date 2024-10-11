@@ -54,7 +54,10 @@ export class ResponsesController {
     const responses = await this.responsesService.findAll(formId);
     const workbook = new Workbook();
     const sheet = workbook.addWorksheet('Responses');
-    const header = [];
+    sheet.properties.defaultColWidth=30;
+    sheet.properties.defaultRowHeight=15;
+    
+    const header = ['Timestamp'];
 
     questions.forEach((question) => {
       header.push(question.text);
@@ -63,7 +66,7 @@ export class ResponsesController {
     this.excelService.writeHeaders(sheet, header);
 
     responses.forEach((response) => {
-      const rowData: string[] = [];
+      const rowData: string[] = [response.submittedDate.toLocaleString()];
       response.answers.forEach((answer) => {
         if (answer.question.type === 'TEXT') {
           rowData.push(answer.text);

@@ -39,7 +39,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   // Mark function as public
   @Public()
-  async login(@Body() body: UserLoginDto): Promise<{ accessToken: string }> {
+  async login(@Body() body: UserLoginDto): Promise<{ accessToken: string ,name:string,email:string}> {
     return await this.authService.authenticateUser(body);
   }
 

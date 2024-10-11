@@ -54,8 +54,11 @@ export class AuthService {
         ...userDetails,
         password: hashedPassword,
       });
-
-      return { id: user.id, name: user.name, email: user.email };
+      const token = await this.jwtService.signAsync(
+        { id: user.id },
+        { secret: process.env.JWT_SECRET },
+      );
+      return { accessToken: token, name: user.name, email: user.email };
     } catch (err) {
       // User Email field  is unique constraint
       // Thowing Exception if Unique Constraint is violated
@@ -101,10 +104,11 @@ export class AuthService {
 
     // Return JWT Token
     return {
+      name: user.name,
+      email: user.email,
       accessToken: token,
     };
   }
-
 
   /**
    * Updates the password for a user with the provided email and OTP.

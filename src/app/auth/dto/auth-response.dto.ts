@@ -6,7 +6,7 @@ import { Exclude } from "class-transformer";
 
 export class AuthResponse{
     @ApiProperty()
-    id:string;
+    accessToken:string;
 
 
     @ApiProperty()
