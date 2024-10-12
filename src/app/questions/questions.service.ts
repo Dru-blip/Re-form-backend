@@ -8,6 +8,13 @@ import { Question, QuestionType } from '@prisma/client';
 export class QuestionsService {
   constructor(private readonly db: PrismaService) {}
 
+  /**
+   * Creates a new question with the given details.
+   *
+   * @param formId - The id of the form this question belongs to.
+   * @param createQuestionDto - The details of the question to be created.
+   * @returns The newly created question.
+   */
   async create(formId: string, createQuestionDto: CreateQuestionDto) {
     return this.db.question.create({
       data: {
@@ -18,7 +25,13 @@ export class QuestionsService {
     });
   }
 
-  async findAll(formId: string):Promise<Question[]> {
+  /**
+   * Finds all questions for the given form id including their options and orders them by question order.
+   *
+   * @param formId - The id of the form.
+   * @returns An array of questions with their options.
+   */
+  async findAll(formId: string): Promise<Question[]> {
     return await this.db.question.findMany({
       where: {
         formId,
@@ -36,6 +49,13 @@ export class QuestionsService {
     return `This action returns a #${id} question`;
   }
 
+  /**
+   * Updates the order of two questions by swapping them.
+   *
+   * @param q1 - The first question to update.
+   * @param q2 - The second question to update.
+   * @returns A promise that resolves when the questions have been updated.
+   */
   async updateOrder(q1: UpdateQuestionDto, q2: UpdateQuestionDto) {
     const q1Update = this.db.question.update({
       where: {
@@ -58,6 +78,13 @@ export class QuestionsService {
     return await this.db.$transaction([q1Update, q2Update]);
   }
 
+  /**
+   * Updates a question with the given id.
+   *
+   * @param id - The id of the question to update.
+   * @param updateQuestionDto - The details of the question to update.
+   * @returns The updated question.
+   */
   async update(id: string, updateQuestionDto: UpdateQuestionDto) {
     const data: Record<string, string | boolean | number> = {};
     if (updateQuestionDto.isRequired !== undefined) {
@@ -88,7 +115,13 @@ export class QuestionsService {
       data: data,
     });
   }
-
+  
+  /**
+   * Deletes a question with the given id.
+   *
+   * @param id - The id of the question to delete.
+   * @returns The deleted question.
+   */
   async remove(id: string) {
     return await this.db.question.delete({
       where: {

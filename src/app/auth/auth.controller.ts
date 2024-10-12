@@ -5,7 +5,7 @@ import {
   HttpCode,
   HttpStatus,
   Post,
-  UseInterceptors
+  UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { User } from '@prisma/client';
@@ -30,7 +30,7 @@ export class AuthController {
   /**
    * Handles user login by authenticating user credentials and returning an access token.
    * @param {UserLoginDto} body - The user's login credentials.
-   * @return {Promise<{accessToken:string}>} A promise that resolves to an object containing the access token.
+   * @return {Promise<AuthResponse>} A promise that resolves to an object containing the access token.
    */
 
   @ApiOperation({ summary: 'login' })
@@ -39,7 +39,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   // Mark function as public
   @Public()
-  async login(@Body() body: UserLoginDto): Promise<{ accessToken: string ,name:string,email:string}> {
+  async login(@Body() body: UserLoginDto): Promise<AuthResponse> {
     return await this.authService.authenticateUser(body);
   }
 
@@ -63,14 +63,32 @@ export class AuthController {
 
   @Post('forgotPassword')
   @Public()
-  async forgotPassword(@Body() body: ForgotPasswordDTO) {
+  /**
+   * Handles forgot password request.
+   *
+   * @param {ForgotPasswordDTO} body - Email address of the user.
+   * @return {Promise<{ id: string, sent: boolean, msg: string }>} A promise that resolves to an object with two properties: id and sent.
+   *         If sent is true, then the id refers to the OTP ID and the msg is a success message. If sent is false, then the id is null and the msg is an error message.
+   */
+  async forgotPassword(
+    @Body() body: ForgotPasswordDTO,
+  ): Promise<{ id: string; sent: boolean; msg: string } | {}> {
     //send email containing otp
     return await this.authService.forgotPassword(body);
   }
 
-  @Post("updatePassword")
+  @Post('updatePassword')
   @Public()
-  async udpatePassword(@Body() body:PasswordUpdateDTO) {
-    return await this.authService.updatePassword(body)
+  /**
+   * Updates the password for a user with the provided email and OTP.
+   *
+   * @param {PasswordUpdateDTO} body - The request body with the email, OTP ID and new password.
+   * @return {Promise<{ message: string, error: any }>} The response object with two properties: message and error.
+   *         If the password is successfully updated, then the message is "success" and the error is null.
+   *         If the OTP is not verified, then the message is "otp not verified" and the error is null.
+   *         If the user is not found, then the message is null and the error is a HttpException with status code 404.
+   */
+  async udpatePassword(@Body() body: PasswordUpdateDTO) {
+    return await this.authService.updatePassword(body);
   }
 }

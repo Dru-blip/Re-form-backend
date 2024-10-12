@@ -1,24 +1,22 @@
 import {
   HttpException,
   HttpStatus,
-  Injectable,
-  UnauthorizedException,
+  Injectable
 } from '@nestjs/common';
-import { UsersService } from 'src/app/users/users.service';
-import { UserRegisterDto } from './dto/user-register.dto';
-import { PasswordService } from './password.service';
-import { UserAlreadyExistException } from './exceptions';
-import { DatabaseErrorCodes } from 'src/app/database/codes';
-import { UserLoginDto } from './dto/user-login.dto';
-import { UserNotFoundException } from './exceptions/user-not-found-exception';
 import { JwtService } from '@nestjs/jwt';
 import { Prisma, User } from '@prisma/client';
-import { AuthResponse } from './dto/auth-response.dto';
+import { DatabaseErrorCodes } from 'src/app/database/codes';
+import { UsersService } from 'src/app/users/users.service';
 import { EmailsService } from '../emails/emails.service';
-import { ForgotPasswordDTO } from './dto/forgot-password.dto';
 import { OtpsService } from '../otps/otps.service';
+import { AuthResponse } from './dto/auth-response.dto';
+import { ForgotPasswordDTO } from './dto/forgot-password.dto';
 import { PasswordUpdateDTO } from './dto/password-update.dto';
-import { error } from 'console';
+import { UserLoginDto } from './dto/user-login.dto';
+import { UserRegisterDto } from './dto/user-register.dto';
+import { UserAlreadyExistException } from './exceptions';
+import { UserNotFoundException } from './exceptions/user-not-found-exception';
+import { PasswordService } from './password.service';
 
 // Service Class For User Authentication
 @Injectable()
@@ -76,7 +74,9 @@ export class AuthService {
    * @param {UserLoginDto} userLoginDetails - The details of the user to be authenticated.
    * @return {Promise<{ accessToken: string }>} The JWT access token for the authenticated user.
    */
-  async authenticateUser(userLoginDetails: UserLoginDto) {
+  async authenticateUser(
+    userLoginDetails: UserLoginDto,
+  ): Promise<AuthResponse> {
     // Find User given by Email
     const user = await this.userService.findUserByEmail(userLoginDetails.email);
     // Check If User Exists or Not
@@ -119,7 +119,7 @@ export class AuthService {
    *         If the OTP is not verified, then the message is "otp not verified" and the error is null.
    *         If the user is not found, then the message is null and the error is a HttpException with status code 404.
    */
-  async updatePassword(body: PasswordUpdateDTO) {
+  async updatePassword(body: PasswordUpdateDTO): Promise<{ message: string}> {
     const user = await this.userService.findUserByEmail(body.email);
     if (!user) {
       throw new HttpException('user not found', HttpStatus.NOT_FOUND);
@@ -132,7 +132,7 @@ export class AuthService {
       let udpatedUser: User = { ...user, password: hashedPassword };
       udpatedUser = await this.userService.updateUser(user.id, udpatedUser);
       await this.otpService.deleteMany(udpatedUser.email);
-      return { message: 'success', error: null };
+      return { message: 'success' };
     } else {
       return { message: 'otp not verified' };
     }
@@ -148,7 +148,7 @@ export class AuthService {
    *         the msg is a success message. If sent is false, then
    *         the id is null and the msg is an error message.
    */
-  async forgotPassword(data: ForgotPasswordDTO) {
+  async forgotPassword(data: ForgotPasswordDTO):Promise<{ id: string, sent: boolean, msg: string }|{}> {
     const user = await this.userService.findUserByEmail(data.email);
     if (!user) {
       return {};
