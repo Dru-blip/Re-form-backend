@@ -8,7 +8,7 @@ export class UserLoginDto {
     @IsNotEmpty()
     @ApiProperty()
     email: string
-
+    
     @ApiProperty()
     @IsNotEmpty({message:"Password is required"})
     password: string
