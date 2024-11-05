@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { User } from '@prisma/client';
+import { LibSQLDatabase } from 'drizzle-orm/libsql';
+
 import { UserRegisterDto } from 'src/app/auth/dto/user-register.dto';
-import PrismaService from 'src/app/database/database.service';
+
 
 // Service Class For Users
 @Injectable()
@@ -9,7 +10,7 @@ export class UsersService {
   /**
    * Constructs a new instance of the UsersService class.
    */
-  constructor(private readonly db: PrismaService) {}
+  constructor(private readonly db:LibSQLDatabase) {}
 
   /**
    * Creates a new user with the provided details.
